@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=320, initial-scale=1.0">
+	<title>CodeFoo</title>
+	<link rel="stylesheet" href="styles/frontend_styles.css">
+	
+</head>
+
+<body>
+
+	<div id="content-wrapper">
+		<div id="content-header">
+			<div id="div-header-left" class="div-header-b-on">
+				<h4>VIDEOS</h4>
+			</div>
+			
+			<div id="div-header-right" class="div-header-b-off">
+				<h4>ARTICLES</h4>
+			</div>
+		</div>
+		
+		<div id="sort-container">
+			<div id="tab_all" style="width: 14%;"><h3>All</h3></div>
+			<div id="tab_ps4" style="width: 14%;"><h3 style="border-left: 1px solid #000">PS4</h3></div>
+			<div id="tab_xbox" style="width: 16%;"><h3 style="border-left: 1px solid #000">Xbox</h3></div>
+			<div id="tab_nintendo" style="width: 26%;"><h3 style="border-left: 1px solid #000">Nintendo</h3></div>
+			<div id="tab_pc" style="width: 11%;"><h3 style="border-left: 1px solid #000">PC</h3></div>
+			<div id="tab_media" style="width: 17%;"><h3 style="border-left: 1px solid #000">Media</h3></div>
+			
+		</div>
+		
+		<ul id="video-list">
+			<li class="loader-container">
+				<div class="loader"></div>
+			</li>
+		</ul>
+		
+		<ul id="article-list" style="display:none">
+			<li class="loader-container">
+				<div class="loader"></div>
+			</li>
+		</ul>
+		
+		<div id="content-footer" onclick="clickLoadMore(5)">
+			<h4>SEE MORE VIDEOS...</h4>
+		</div>
+	</div>	
+
+	<script src="scripts/frontend_script.js"></script>
+	
+</body>
+
+</html>

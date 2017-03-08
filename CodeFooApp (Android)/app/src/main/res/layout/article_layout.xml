@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorBoxBack">
+
+
+    <RelativeLayout
+        android:layout_width="100dp"
+        android:layout_height="2dp"
+        android:background="@color/colorDarkRed">
+
+
+    </RelativeLayout>
+
+    <TextView
+        android:text="0 min ago"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorTextTime"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="4dp"
+        android:scaleType="fitXY"
+        android:id="@+id/TVtime" />
+
+    <TextView
+        android:text="This is a title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorTextTitle"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:id="@+id/TVtitle" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        app:srcCompat="@mipmap/ic_launcher"
+        android:id="@+id/imageView"
+        android:layout_marginTop="20dp" />
+</LinearLayout>
