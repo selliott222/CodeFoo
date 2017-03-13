@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+* {
+	margin:0px;
+	padding:0px;
+	position:relative;
+}
+
+body {
+	background-image: url("img/background.png");
+}
+
+header {
+	width:100%;
+	padding: 10px;
+	background-color: black;
+	color: white;
+	font-size: 40px;
+	font-weight: bold;
+}
+
+.button-container {
+	clear:both;
+	width:120px;
+	height:60px;
+	margin-top:5px;
+	margin-left: auto;
+    margin-right: auto;
+}
+
+#playbutton {
+	border: 3px solid #794099;
+	width:120px;
+	height:60px;
+}
+
+.text-container {
+	margin-top:5px;
+	padding-left: 0;
+    padding-right: 0;
+	width:600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#player-tiles-table {
+	border: 1px solid #794099;
+	border-spacing: 2px;
+	width:500px;
+	height:80px;
+	margin-top:5px;
+	margin-left: auto;
+    margin-right: auto;
+}
+
+
+#body-container {
+	padding-left: 0;
+    padding-right: 0;
+	width:601px;
+	height:540px;
+    margin-left: auto;
+    margin-right: auto;
+	margin-top:20px;
+    display: block;
+	border:3px solid #794099;
+}
+
+.board-positions {
+    float: left;
+    width: 30px;
+    height: 30px;
+    margin: 0px;
+    padding: 0px;
+    border: 1px solid #F8F8F8;
+	overflow:hidden;
+}
+
+.board-positions img{
+	float: left;
+    width: 30px;
+    height: 30px;
+    margin: 0px;
+    padding: 0px;
+    border: 1px solid black;
+}
+
+.player-tile{
+	float: left;
+    width: 15%;
+    height: 90%;
+    margin: 3px;
+    padding: 0px;
+    border: 1px solid black;
+}
+
+.player-tile img{
+	float: left;
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    border: 1px solid black;
+}
+
+</style>
+
+</head>
+
+<body>
+
+	<header>
+		<font color="red">Q</font><font color="blue">w</font><font color="green">i</font><font color="yellow">r</font><font color="purple">k</font><font color="red">l</font><font color="blue">e</font>
+	</header>
+	
+	<div id="body-container">
+		<div id = "game-div" width ="100%" height="100%">
+		</div>
+	</div>
+	
+	<div class="text-container">
+		<h3 id="score" width="300px">Player Score: 0</h3>
+		<h3 id="cpuscore" width="300px">CPU Score: 0</h3>
+	</div>
+	
+	<div id="player-tiles-table">
+	</div>
+	
+	<div class="button-container">
+		<button id="playbutton" onclick="play()">PLAY</button>
+	</div>
+	
+	<div class="text-container">
+		<h3>Instructions:</h3>
+		<p>
+			Gameplay
+			<br/>
+			On your turn you can do one of the 3 actions:
+			<br/>
+			Add one tile to the grid and draw a tile to bring your deck again to 6.
+			<br/>
+			Add two or more tiles to the grid.
+			<br/>
+			All tiles played must share one attribute (color or shape) and must be placed in the same line.
+			<br/>
+			The tiles must not all have to touch each other.
+			<br/>
+			Again, draw tiles until your deck has 6 tiles again.
+			<br/>
+			Trade some or all of your tiles for different tiles.
+		</p>
+	</div>
+	
+	<br/>
+	
+	
+	
+	<script>
+		var imgdragged = null;
+		var tiledragged = null;
+		var indexdragged = {x:0, y:0};
+		var player_tiles = [];
+		var cpu_tiles = [];
+		var point_tracker_array = [];
+		var tiles_onboard = []; //List of all the tiles on the board with a state == -1
+		var message = "Valid Move!!!";
+		var total_points = 0;
+		var cpu_total_points = 0;
+		var points = 0;
+		var turn = 0;
+		
+		gameboard = document.getElementById('game-div');
+		tileTable = document.getElementById('player-tiles-table');
+		score = document.getElementById('score');
+		cpuScoreDisplay = document.getElementById('cpuscore');
+		whoseturn = document.getElementById('whoseturn');
+		
+		tile_width=30;
+		tile_height=30;
+		board_width = 600;
+		board_height = 540;
+		
+		grid = new Array();
+	
+		window.onload = function(){
+			
+			for (i=0; i < board_height-tile_height; i += tile_height){
+				grid[i/30] = new Array();
+				for (j=0; j < board_width-tile_width; j += tile_width){
+					grid[i/30][j/30] = 0;
+					div = document.createElement('div');
+					div.className = "board-positions";
+					div.addEventListener('dragover', allowDrop, false);
+					div.addEventListener('drop', drop, false);
+					div.setAttribute("data-row-index", i/tile_height);
+					div.setAttribute("data-col-index", j/tile_width);
+					div.id = (i/30) + ":" + (j/30);
+					
+					if (i == 240 && j == 270){
+						div.style.border = "1px solid black";
+						t = new Tile(random_shape(), random_color(), -1, i/30, j/30, div);
+						img = new createTileImg(t);
+						t.img = img;
+						div.appendChild(img);
+						grid[i/30][j/30] = t;
+				
+						tiles_onboard[tiles_onboard.length] = t;
+					}
+					
+					gameboard.appendChild(div);
+				}
+			}
+			
+			grid[17] = new Array();
+			for (i=0; i<6;i++){
+				div = document.createElement('div');
+				div.className = "player-tile";
+				div.addEventListener('dragover', allowDrop, false);
+				div.addEventListener('drop', drop, false);
+				div.id = "ptile" + i;
+				
+				t = new Tile(random_shape(), random_color(), 1, 17, i, div);
+				img = new createTileImg(t);
+				t.img = img;
+				div.appendChild(img);
+
+				div.setAttribute("data-row-index", 17);
+				div.setAttribute("data-col-index", i);
+				
+				tileTable.appendChild(div);
+				
+				grid[17][i] = t;
+				player_tiles[i] = t;
+			}
+			
+			console.log(grid);
+		}
+		
+		
+		var Tile = function(shp, clr, st, ri, ci, str_div){
+			this.shape = shp;
+			this.color = clr;
+			this.state = st;
+			this.row = ri;
+			this.col = ci;
+			this.touching = false;
+			this.valid_position = true;
+			this.img = null;
+			this.str_div = str_div;
+			this.current_div = str_div;
+			this.pointtracker = false;
+			
+			this.checkTouching = function(){
+				check_direction_t_array = new Array();
+				check_direction_t_array[0] = {dir:"top", touchtile:checkIndex(this, this.row-1, this.col)};
+				check_direction_t_array[1] = {dir:"bottom", touchtile:checkIndex(this, this.row+1, this.col)};
+				check_direction_t_array[2] = {dir:"left", touchtile:checkIndex(this, this.row, this.col-1)};
+				check_direction_t_array[3] = {dir:"right", touchtile:checkIndex(this, this.row, this.col+1)};
+								
+				for (dir_check_t in check_direction_t_array){
+					touchtile = check_direction_t_array[dir_check_t].touchtile;
+					if (touchtile.state == -1){
+						this.touching = true;
+					}
+				}
+			}
+			
+			this.pointTotal = function(){
+			
+				var horChain = false;
+				var vertChain = false;
+			
+				if (this.row != 17){
+
+					if (!this.pointtracker){
+						this.pointtracker = true;
+						}
+					
+					check_direction_p_array = new Array();
+					check_direction_p_array[0] = {dir:"top", ptile:checkIndex(this, this.row-1, this.col)};
+					check_direction_p_array[1] = {dir:"bottom", ptile:checkIndex(this, this.row+1, this.col)};
+					check_direction_p_array[2] = {dir:"left", ptile:checkIndex(this, this.row, this.col-1)};
+					check_direction_p_array[3] = {dir:"right", ptile:checkIndex(this, this.row, this.col+1)};
+							
+					for (dir_check in check_direction_p_array){
+						
+						ptile = check_direction_p_array[dir_check].ptile;
+						inc = 1;
+						
+						while (ptile.state != 0 && ptile.state != -2){
+							
+							if (!grid[ptile.row][ptile.col].pointtracker){
+								
+								points += 1;
+								grid[ptile.row][ptile.col].pointtracker = true;
+									
+										
+								switch (check_direction_p_array[dir_check].dir){
+									case "top":
+									case "bottom":
+										if (!vertChain){vertChain = true; points += 1;}
+										break;
+									case "left":
+									case "right":
+										if (!horChain){horChain = true; points += 1;}
+										break;
+									}
+								
+								}
+								
+								
+							switch (check_direction_p_array[dir_check].dir) {
+								case "top":
+									ptile = checkIndex(this, this.row-1-inc, this.col);
+									break;
+								case "bottom":
+									ptile = checkIndex(this, this.row+1+inc, this.col);
+									break;
+								case "left":
+									ptile = checkIndex(this, this.row, this.col-1-inc);
+									break;
+								case "right":
+									ptile = checkIndex(this, this.row, this.col+1+inc);
+									break;
+								}
+								
+							inc++;
+							
+							}
+						}
+					}
+			}
+			
+			this.checkPositionValid = function(){
+			
+				if (this.row != 17){
+					var locationIsPosible = false; 
+					var isChain = true;
+					var isSameEntry = false;
+					var player_tile_chain = false;
+					var touchingTiles = false;
+					var horChain = false;
+					var vertChain = false;
+
+					
+					check_direction_array = new Array();
+					check_direction_array[0] = {dir:"top", tile:checkIndex(this, this.row-1, this.col)};
+					check_direction_array[1] = {dir:"bottom", tile:checkIndex(this, this.row+1, this.col)};
+					check_direction_array[2] = {dir:"left", tile:checkIndex(this, this.row, this.col-1)};
+					check_direction_array[3] = {dir:"right", tile:checkIndex(this, this.row, this.col+1)};
+							
+					for (dir_check in check_direction_array){
+						
+						tile = check_direction_array[dir_check].tile;
+						inc = 1;
+						
+						while (tile.state != 0 && tile.state != -2){
+							
+							if (tile.state == 1 || this.state == -1){
+								player_tile_chain=true;}
+						
+							locationIsPosible = true;
+								
+							if (this.color != tile.color && this.shape != tile.shape){
+									isChain = false;
+								}
+								
+							if (this.color == tile.color && this.shape == tile.shape){
+									isSameEntry  = true;
+								}
+
+							if (tile.state == -1 || tile.touching){
+									touchingTiles = true;
+								}
+							
+							switch (check_direction_array[dir_check].dir) {
+								case "top":
+									tile = checkIndex(this, this.row-1-inc, this.col);
+									break;
+								case "bottom":
+									tile = checkIndex(this, this.row+1+inc, this.col);
+									break;
+								case "left":
+									tile = checkIndex(this, this.row, this.col-1-inc);
+									break;
+								case "right":
+									tile = checkIndex(this, this.row, this.col+1+inc);
+									break;
+								}
+							
+							inc++;
+							
+							}
+
+					}
+					
+					if (locationIsPosible && isChain && player_tile_chain && touchingTiles && !isSameEntry){
+						this.valid_position = true;
+					}
+					else {
+						this.valid_position = false;
+						
+						if (!locationIsPosible){message = "INVALID POSITION"}
+						if (!touchingTiles){message = "All Tiles Must Connect in same row or col"}
+						if (!isChain){message = "INVALID: CHAIN WITHOUT SAME COLOR OR SAME SHAPE!"}
+						if (isSameEntry){message = "INVALID: TWO OF THE SAME ITEM IN CHAIN!"}
+					}
+
+				}
+				else{ 
+					this.valid_position = true;
+				}
+			}
+			
+			return this;
+		}
+		
+		function createTileImg(t){
+			img = document.createElement('img');
+			img.addEventListener('dragstart', drag, false);
+			img.addEventListener('dragend', endDrag, false);
+			img.src = "img/" + t.color + t.shape + ".png"
+			img.id = "tile";
+			img.draggable = "true";
+			
+			if (t.state == -1){
+				img.removeEventListener("dragstart", drag);
+				img.removeEventListener("dragend", endDrag);
+				}
+				
+			
+			return img;
+		}
+		
+		function random_color(){ //returns random interger between a1 and b1
+			random = Math.round(Math.random() * 4); 
+			switch (random){
+			case 0:
+				return "blue";
+				break;
+			case 1:
+				return "red";
+				break;
+			case 2:
+				return "yellow";
+				break;
+			case 3:
+				return "green";
+				break;
+			case 4:
+				return "pink";
+				break;
+			}
+		}
+		
+		function random_shape(){ //returns random interger between a1 and b1
+			random = Math.round(Math.random() * 5); 
+			switch (random){
+			case 0:
+				return "yoshi";
+				break;
+			case 1:
+				return "mush";
+				break;
+			case 2:
+				return "tri";
+				break;
+			case 3:
+				return "dk";
+				break;
+			case 4:
+				return "poke";
+				break;
+			case 5:
+				return "star";
+				break;
+			}
+		}
+		
+		function allowDrop(ev) {
+			ev.preventDefault();
+		}
+		
+		function endDrag(ev) {
+		
+			if (turn == 1){return;}
+			
+			ev.preventDefault();
+			evrow = parseInt(ev.target.parentElement.getAttribute("data-row-index"));
+			evcol = parseInt(ev.target.parentElement.getAttribute("data-col-index"));
+			
+			tiledragged.row = evrow;
+			tiledragged.col = evcol;
+			tiledragged.current_div = ev.target.parentElement;
+			tiledragged.checkTouching();
+
+			grid[evrow][evcol] = tiledragged;			
+		}
+
+		function drag(ev) {
+			imgdragged = ev.target;
+			evrow = ev.target.parentElement.getAttribute("data-row-index");
+			evcol = ev.target.parentElement.getAttribute("data-col-index");
+			
+			indexdragged.x = evcol;
+			indexdragged.y = evrow;
+			tiledragged = grid[evrow][evcol];
+			grid[evrow][evcol] = 0;
+		}
+
+		function drop(ev) {
+			ev.preventDefault();
+			
+			evrow = parseInt(ev.target.getAttribute("data-row-index"));
+			evcol = parseInt(ev.target.getAttribute("data-col-index"));
+			
+			if (tiledragged.state == -1 || turn == 1){return;}
+			
+			if (!ev.target.hasChildNodes() && (ev.target.className == "board-positions" ||  ev.target.className == "player-tile")){
+				ev.target.appendChild(imgdragged);
+			}
+		}
+		
+		function checkIndex(tile, a,b){
+			
+			if (a < 0 || a > grid.length - 2){return {state:-2, color:"none", shape:"none",touching:false, row:a, col:b};}
+			if (b < 0 || b > grid[0].length - 1){return {state:-2, color:"none", shape:"none",touching:false, row:a, col:b};}
+			
+			if (grid[a][b] != 0){
+				return {state:grid[a][b].state, color:grid[a][b].color, shape:grid[a][b].shape, touching:grid[a][b].touching, row:grid[a][b].row, col:grid[a][b].col};
+			}
+			else {
+				return {state:0, color:"none", shape:"none",touching:false, row:a, col:b};
+			}
+		
+		}
+		
+		function play(){
+		
+			if (turn == 1){return;}
+		
+			message = "Valid Move!!!";
+			array_rowcol_match = [];
+			same_row = true;
+			same_col = true;
+			points = 0;
+			
+			clearGrid();
+			
+			for (g in player_tiles){
+				player_tiles[g].checkPositionValid();
+				player_tiles[g].pointTotal();
+					
+				if (player_tiles[g].row != 17){
+					array_rowcol_match[array_rowcol_match.length] = player_tiles[g];
+				}
+				
+			}
+			
+			for (q in array_rowcol_match){
+				for (w in array_rowcol_match){
+					if (array_rowcol_match[q].row != array_rowcol_match[w].row){
+						same_row = false;
+					}
+					
+					if (array_rowcol_match[q].col != array_rowcol_match[w].col){
+						same_col = false;
+					}
+				}
+			}
+			
+			if (same_row || same_col){
+				console.log(message + " Points: " + points);
+				score.innerHTML = "Player Score: " + total_points + " " + message;
+			}
+			else {
+				console.log("Entries must all be in same row");
+				score.innerHTML = "Player Score: " + total_points + " " + message;
+			}
+			
+			if (message == "Valid Move!!!"){
+			
+				turn = 1;
+			
+				total_points += points;
+				score.innerHTML = "Player Score: " + total_points + " Last Chain: +" + points;
+				
+				for (g in player_tiles){
+					
+					if (player_tiles[g].row != 17){
+						player_tiles[g].state = -1;
+						player_tiles[g].touching = false;
+						player_tiles[g].img.removeEventListener("dragstart", drag);
+						player_tiles[g].img.removeEventListener("dragend", endDrag);
+						player_tiles[g].current_div.style.border = "1px solid black";
+						tiles_onboard[tiles_onboard.length] = player_tiles[g];
+						
+						t = new Tile(random_shape(), random_color(), 1, 17, g, div);
+						img = new createTileImg(t);
+						t.img = img;
+						player_tiles[g] = t;
+						
+						//figure it out 
+						for (u=0; u < 6; u++){
+							if (document.getElementById("ptile" + u).innerHTML == ""){
+								div = document.getElementById("ptile" + u);
+								div.appendChild(img);
+								grid[17][u] = t;
+							}
+						}
+					}
+				}
+				
+				setTimeout(cpuMove(), 3000);
+			}
+		}
+		
+		function random_size(){
+			return Math.round(Math.random() * 3) + 1;
+		}
+		
+		function random_direction(){
+			p = Math.round(Math.random() * 3);
+			if (p == 0){return "up";}
+			if (p == 1){return "down";}
+			if (p == 2){return "left";}
+			else {return "right";}
+		}
+		
+		function cpuMove(){
+		
+			validPattern = false
+			
+			tob = Math.floor(Math.random() * (tiles_onboard.length));
+			create = false;
+			tasking = false;
+			errorinc = 0;
+			while (!create){
+				create = randomChain(tiles_onboard[tob], random_size(), random_direction());
+				errorinc++;
+				if (errorinc > 100){console.log("COMPUTER SKIPS TURN"); create = true;}
+				}
+			if (create){
+					turn = 0;
+					}
+					
+			points = 0;
+			
+			clearGrid();
+			
+			if (cpu_tiles.length > 0){
+				for (cput in cpu_tiles){
+					cpu_tiles[cput].pointTotal();
+				}
+			}
+			
+			cpu_total_points += points;
+			cpuScoreDisplay.innerHTML = "CPU Score: " + cpu_total_points + " Last Chain: +" + points;
+			
+			point_tracker_array = [];
+			
+			console.log("cpu points: " + points);
+		}
+		
+		function randomChain(tl, size, ch_dir){
+
+			cpu_tiles = [];
+			ts = 1;
+			solidtiles = 0;
+			min = 0;
+			
+			while (ts <= (size + solidtiles)){
+				if (ch_dir == "up"){chktile = checkIndex(tl, tl.row+ts, tl.col);}
+				else if (ch_dir == "down"){chktile = checkIndex(tl, tl.row-ts, tl.col);}
+				else if (ch_dir == "left"){chktile = checkIndex(tl, tl.row, tl.col-ts);}
+				else {chktile = checkIndex(tl, tl.row, tl.col+ts);}
+					
+				pr = chktile.row; 
+				pc = chktile.col;
+
+				if (chktile.state == -2){
+					ts = 50;
+				}
+				
+				if (chktile.state == -1){
+					solidtiles+=1;
+				}
+				
+				else if (chktile.state == 0){
+					
+					tilehit = false;
+					backupinc = 0;
+						
+					while (!tilehit){
+						
+						ttt = new Tile(random_shape(), random_color(), -1, pr, pc);
+						ttt.checkTouching();
+						grid[pr][pc]=ttt;
+						ttt.checkPositionValid();
+						backupinc++;
+						if (ttt.valid_position){
+							tilehit = true;
+							tiles_onboard[tiles_onboard.length] = ttt;
+							cpu_tiles[cpu_tiles.length] = ttt;
+							div = document.getElementById(ttt.row + ":" + ttt.col);
+							div.style.border = "1px solid black";
+							img = new createTileImg(ttt);
+							ttt.img = img;
+							div.appendChild(img);
+							min++;
+							}
+							
+						else if (backupinc > 50){tilehit = true; grid[pr][pc]=0; ts=40;}
+					}
+				}
+				
+				ts++;
+				
+			}	
+				
+			if (min>0){return true;}
+			else {return false;}
+
+		}
+		
+		function clearGrid(){
+			for (n in grid){
+				for(m in grid[n]){
+					grid[n][m].pointtracker = false;
+				}
+			}
+		}
+
+	</script>
+	
+</body>
+
+</html>
