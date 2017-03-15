@@ -12,6 +12,10 @@ body {
 	background-image: url("img/background.png");
 }
 
+p {
+	line-height:40px;
+}
+
 header {
 	width:100%;
 	padding: 10px;
@@ -23,8 +27,7 @@ header {
 
 .button-container {
 	clear:both;
-	width:120px;
-	height:60px;
+	width:180px;
 	margin-top:5px;
 	margin-left: auto;
     margin-right: auto;
@@ -32,8 +35,8 @@ header {
 
 #playbutton {
 	border: 3px solid #794099;
-	width:120px;
-	height:60px;
+	width:180px;
+	padding:10px;
 }
 
 .text-container {
@@ -59,8 +62,8 @@ header {
 #body-container {
 	padding-left: 0;
     padding-right: 0;
-	width:601px;
-	height:540px;
+	width:662px;
+	height:410px;
     margin-left: auto;
     margin-right: auto;
 	margin-top:20px;
@@ -69,6 +72,7 @@ header {
 }
 
 .board-positions {
+	position:absolute;
     float: left;
     width: 30px;
     height: 30px;
@@ -112,7 +116,7 @@ header {
 <body>
 
 	<header>
-		<font color="red">Q</font><font color="blue">w</font><font color="green">i</font><font color="yellow">r</font><font color="purple">k</font><font color="red">l</font><font color="blue">e</font>
+		Qwirkle
 	</header>
 	
 	<div id="body-container">
@@ -129,27 +133,49 @@ header {
 	</div>
 	
 	<div class="button-container">
-		<button id="playbutton" onclick="play()">PLAY</button>
+		<button id="playbutton" onclick="play()">PLAY (30 Turns Left)</button>
 	</div>
 	
 	<div class="text-container">
 		<h3>Instructions:</h3>
-		<p>
-			Gameplay
+		<br/>
+			<p>
+			Gameplay:
 			<br/>
-			On your turn you can do one of the 3 actions:
+			The Player is given 6 tiles to drag and drop on the board.
 			<br/>
-			Add one tile to the grid and draw a tile to bring your deck again to 6.
+			Tiles must be placed in rows or columns that have either a similar color or shape.
 			<br/>
-			Add two or more tiles to the grid.
+			When the Player has placed a valid combination on the board, press the play button.
+			</br>
+			(The Player can skip their turn by pressing the play button without any tiles in play)
+			</br>
+			The Player is awarded a point for every block in the line they have created.
 			<br/>
-			All tiles played must share one attribute (color or shape) and must be placed in the same line.
+			When a tile belongs to two lines, two points will be scored.
 			<br/>
-			The tiles must not all have to touch each other.
+			
+		<br/>
+			<p>
+			Rules:
 			<br/>
-			Again, draw tiles until your deck has 6 tiles again.
+			1. Tiles must all connect to the grid and form a connecting line.
 			<br/>
-			Trade some or all of your tiles for different tiles.
+			2. Tiles placed by the player must all be in either the same row or column.
+			<br/>
+			3. All rows and columns that share the same color can not have 2 of the same shape repeated.
+			</br>
+			4. All rows and columns that share the same shape can not have 2 of the same color repeated.
+			</br>
+			
+		<br/>
+			<p>
+			Extra:
+			<br/>
+			Recommnded Browser: Google Chrome
+			</br>
+
+
 		</p>
 	</div>
 	
@@ -170,50 +196,60 @@ header {
 		var cpu_total_points = 0;
 		var points = 0;
 		var turn = 0;
+		var turnsleft = 30;
 		
 		gameboard = document.getElementById('game-div');
 		tileTable = document.getElementById('player-tiles-table');
 		score = document.getElementById('score');
 		cpuScoreDisplay = document.getElementById('cpuscore');
-		whoseturn = document.getElementById('whoseturn');
+		button = document.getElementById("playbutton");
 		
-		tile_width=30;
-		tile_height=30;
-		board_width = 600;
-		board_height = 540;
+		board_width = 630;
+		board_height = 390;
+		lastgridrow = (board_height/30) - 1;
+		
 		
 		grid = new Array();
 	
 		window.onload = function(){
+			newGrid();
+		}
+		
+		function newGrid(){
+		
+			gameboard.innerHTML = "";
 			
-			for (i=0; i < board_height-tile_height; i += tile_height){
-				grid[i/30] = new Array();
-				for (j=0; j < board_width-tile_width; j += tile_width){
-					grid[i/30][j/30] = 0;
+			for (i=0; i < (board_height)/30; i+=1){
+				grid[i] = new Array();
+				for (j=0; j < (board_width)/30; j+=1){
+					grid[i][j] = 0;
 					div = document.createElement('div');
 					div.className = "board-positions";
 					div.addEventListener('dragover', allowDrop, false);
 					div.addEventListener('drop', drop, false);
-					div.setAttribute("data-row-index", i/tile_height);
-					div.setAttribute("data-col-index", j/tile_width);
-					div.id = (i/30) + ":" + (j/30);
+					div.setAttribute("data-row-index", i);
+					div.setAttribute("data-col-index", j);
+					div.id = i+ ":" + j;
+					div.style.top = (i * 31.5) + "px";
+					div.style.left = (j * 31.5) + "px";
 					
-					if (i == 240 && j == 270){
+					if (i==6 && j==10){
 						div.style.border = "1px solid black";
-						t = new Tile(random_shape(), random_color(), -1, i/30, j/30, div);
+						t = new Tile(random_shape(), random_color(), -1, i, j, div);
 						img = new createTileImg(t);
 						t.img = img;
 						div.appendChild(img);
-						grid[i/30][j/30] = t;
+						grid[i][j] = t;
 				
 						tiles_onboard[tiles_onboard.length] = t;
 					}
 					
 					gameboard.appendChild(div);
+					tileTable.innerHTML = "";
 				}
 			}
 			
-			grid[17] = new Array();
+			grid[lastgridrow+1] = new Array();
 			for (i=0; i<6;i++){
 				div = document.createElement('div');
 				div.className = "player-tile";
@@ -221,17 +257,17 @@ header {
 				div.addEventListener('drop', drop, false);
 				div.id = "ptile" + i;
 				
-				t = new Tile(random_shape(), random_color(), 1, 17, i, div);
+				t = new Tile(random_shape(), random_color(), 1, lastgridrow+1, i, div);
 				img = new createTileImg(t);
 				t.img = img;
 				div.appendChild(img);
 
-				div.setAttribute("data-row-index", 17);
+				div.setAttribute("data-row-index", lastgridrow+1);
 				div.setAttribute("data-col-index", i);
 				
 				tileTable.appendChild(div);
 				
-				grid[17][i] = t;
+				grid[lastgridrow+1][i] = t;
 				player_tiles[i] = t;
 			}
 			
@@ -254,10 +290,10 @@ header {
 			
 			this.checkTouching = function(){
 				check_direction_t_array = new Array();
-				check_direction_t_array[0] = {dir:"top", touchtile:checkIndex(this, this.row-1, this.col)};
-				check_direction_t_array[1] = {dir:"bottom", touchtile:checkIndex(this, this.row+1, this.col)};
-				check_direction_t_array[2] = {dir:"left", touchtile:checkIndex(this, this.row, this.col-1)};
-				check_direction_t_array[3] = {dir:"right", touchtile:checkIndex(this, this.row, this.col+1)};
+				check_direction_t_array[0] = {dir:"top", touchtile:checkIndex(this.row-1, this.col)};
+				check_direction_t_array[1] = {dir:"bottom", touchtile:checkIndex(this.row+1, this.col)};
+				check_direction_t_array[2] = {dir:"left", touchtile:checkIndex(this.row, this.col-1)};
+				check_direction_t_array[3] = {dir:"right", touchtile:checkIndex(this.row, this.col+1)};
 								
 				for (dir_check_t in check_direction_t_array){
 					touchtile = check_direction_t_array[dir_check_t].touchtile;
@@ -272,17 +308,17 @@ header {
 				var horChain = false;
 				var vertChain = false;
 			
-				if (this.row != 17){
+				if (this.row != lastgridrow+1){
 
 					if (!this.pointtracker){
 						this.pointtracker = true;
 						}
 					
 					check_direction_p_array = new Array();
-					check_direction_p_array[0] = {dir:"top", ptile:checkIndex(this, this.row-1, this.col)};
-					check_direction_p_array[1] = {dir:"bottom", ptile:checkIndex(this, this.row+1, this.col)};
-					check_direction_p_array[2] = {dir:"left", ptile:checkIndex(this, this.row, this.col-1)};
-					check_direction_p_array[3] = {dir:"right", ptile:checkIndex(this, this.row, this.col+1)};
+					check_direction_p_array[0] = {dir:"top", ptile:checkIndex(this.row-1, this.col)};
+					check_direction_p_array[1] = {dir:"bottom", ptile:checkIndex(this.row+1, this.col)};
+					check_direction_p_array[2] = {dir:"left", ptile:checkIndex(this.row, this.col-1)};
+					check_direction_p_array[3] = {dir:"right", ptile:checkIndex(this.row, this.col+1)};
 							
 					for (dir_check in check_direction_p_array){
 						
@@ -313,16 +349,16 @@ header {
 								
 							switch (check_direction_p_array[dir_check].dir) {
 								case "top":
-									ptile = checkIndex(this, this.row-1-inc, this.col);
+									ptile = checkIndex(this.row-1-inc, this.col);
 									break;
 								case "bottom":
-									ptile = checkIndex(this, this.row+1+inc, this.col);
+									ptile = checkIndex(this.row+1+inc, this.col);
 									break;
 								case "left":
-									ptile = checkIndex(this, this.row, this.col-1-inc);
+									ptile = checkIndex(this.row, this.col-1-inc);
 									break;
 								case "right":
-									ptile = checkIndex(this, this.row, this.col+1+inc);
+									ptile = checkIndex(this.row, this.col+1+inc);
 									break;
 								}
 								
@@ -335,7 +371,7 @@ header {
 			
 			this.checkPositionValid = function(){
 			
-				if (this.row != 17){
+				if (this.row != lastgridrow+1){
 					var locationIsPosible = false; 
 					var isChain = true;
 					var isSameEntry = false;
@@ -346,10 +382,10 @@ header {
 
 					
 					check_direction_array = new Array();
-					check_direction_array[0] = {dir:"top", tile:checkIndex(this, this.row-1, this.col)};
-					check_direction_array[1] = {dir:"bottom", tile:checkIndex(this, this.row+1, this.col)};
-					check_direction_array[2] = {dir:"left", tile:checkIndex(this, this.row, this.col-1)};
-					check_direction_array[3] = {dir:"right", tile:checkIndex(this, this.row, this.col+1)};
+					check_direction_array[0] = {dir:"top", tile:checkIndex(this.row-1, this.col)};
+					check_direction_array[1] = {dir:"bottom", tile:checkIndex(this.row+1, this.col)};
+					check_direction_array[2] = {dir:"left", tile:checkIndex(this.row, this.col-1)};
+					check_direction_array[3] = {dir:"right", tile:checkIndex(this.row, this.col+1)};
 							
 					for (dir_check in check_direction_array){
 						
@@ -377,16 +413,16 @@ header {
 							
 							switch (check_direction_array[dir_check].dir) {
 								case "top":
-									tile = checkIndex(this, this.row-1-inc, this.col);
+									tile = checkIndex(this.row-1-inc, this.col);
 									break;
 								case "bottom":
-									tile = checkIndex(this, this.row+1+inc, this.col);
+									tile = checkIndex(this.row+1+inc, this.col);
 									break;
 								case "left":
-									tile = checkIndex(this, this.row, this.col-1-inc);
+									tile = checkIndex(this.row, this.col-1-inc);
 									break;
 								case "right":
-									tile = checkIndex(this, this.row, this.col+1+inc);
+									tile = checkIndex(this.row, this.col+1+inc);
 									break;
 								}
 							
@@ -402,10 +438,10 @@ header {
 					else {
 						this.valid_position = false;
 						
-						if (!locationIsPosible){message = "INVALID POSITION"}
-						if (!touchingTiles){message = "All Tiles Must Connect in same row or col"}
-						if (!isChain){message = "INVALID: CHAIN WITHOUT SAME COLOR OR SAME SHAPE!"}
-						if (isSameEntry){message = "INVALID: TWO OF THE SAME ITEM IN CHAIN!"}
+						if (!locationIsPosible){message = "Invalid Position!"}
+						if (!touchingTiles){message = "All Player tiles must connect!"}
+						if (!isChain){message = "Tiles must all have same Color or Shape!"}
+						if (isSameEntry){message = "Two of the same item!"}
 					}
 
 				}
@@ -523,7 +559,7 @@ header {
 			}
 		}
 		
-		function checkIndex(tile, a,b){
+		function checkIndex(a,b){
 			
 			if (a < 0 || a > grid.length - 2){return {state:-2, color:"none", shape:"none",touching:false, row:a, col:b};}
 			if (b < 0 || b > grid[0].length - 1){return {state:-2, color:"none", shape:"none",touching:false, row:a, col:b};}
@@ -553,7 +589,7 @@ header {
 				player_tiles[g].checkPositionValid();
 				player_tiles[g].pointTotal();
 					
-				if (player_tiles[g].row != 17){
+				if (player_tiles[g].row != lastgridrow+1){
 					array_rowcol_match[array_rowcol_match.length] = player_tiles[g];
 				}
 				
@@ -573,11 +609,12 @@ header {
 			
 			if (same_row || same_col){
 				console.log(message + " Points: " + points);
-				score.innerHTML = "Player Score: " + total_points + " " + message;
+				score.innerHTML = "Player Score: " + total_points + " (" + message + ")";
 			}
 			else {
 				console.log("Entries must all be in same row");
-				score.innerHTML = "Player Score: " + total_points + " " + message;
+				message = "Tiles not in same line!";
+				score.innerHTML = "Player Score: " + total_points + " (" + message + ")";
 			}
 			
 			if (message == "Valid Move!!!"){
@@ -585,11 +622,11 @@ header {
 				turn = 1;
 			
 				total_points += points;
-				score.innerHTML = "Player Score: " + total_points + " Last Chain: +" + points;
+				score.innerHTML = "Player Score: " + total_points + " (+" + points + ")";
 				
 				for (g in player_tiles){
 					
-					if (player_tiles[g].row != 17){
+					if (player_tiles[g].row != lastgridrow+1){
 						player_tiles[g].state = -1;
 						player_tiles[g].touching = false;
 						player_tiles[g].img.removeEventListener("dragstart", drag);
@@ -597,7 +634,7 @@ header {
 						player_tiles[g].current_div.style.border = "1px solid black";
 						tiles_onboard[tiles_onboard.length] = player_tiles[g];
 						
-						t = new Tile(random_shape(), random_color(), 1, 17, g, div);
+						t = new Tile(random_shape(), random_color(), 1, lastgridrow+1, g, div);
 						img = new createTileImg(t);
 						t.img = img;
 						player_tiles[g] = t;
@@ -607,13 +644,27 @@ header {
 							if (document.getElementById("ptile" + u).innerHTML == ""){
 								div = document.getElementById("ptile" + u);
 								div.appendChild(img);
-								grid[17][u] = t;
+								grid[lastgridrow+1][u] = t;
 							}
 						}
 					}
 				}
 				
-				setTimeout(cpuMove(), 3000);
+				cpuMove();
+				
+				if (turnsleft > 0){
+					turnsleft -= 1;
+					button.innerHTML = "PLAY (" + turnsleft + ")";
+					}
+				else {
+					if (total_points > cpu_total_points){alert("YOU WIN! Score: " + total_points + " - " + cpu_total_points);}
+					else alert("YOU LOSE Score: " + total_points + " - " + cpu_total_points);
+					total_points=0;
+					cpu_total_points=0;
+					turnsleft = 30;
+					button.innerHTML = "PLAY (" + turnsleft + ")";
+					newGrid();
+				}
 			}
 		}
 		
@@ -657,11 +708,9 @@ header {
 			}
 			
 			cpu_total_points += points;
-			cpuScoreDisplay.innerHTML = "CPU Score: " + cpu_total_points + " Last Chain: +" + points;
+			cpuScoreDisplay.innerHTML = "CPU Score: " + cpu_total_points + " (+" + points + ")";
 			
 			point_tracker_array = [];
-			
-			console.log("cpu points: " + points);
 		}
 		
 		function randomChain(tl, size, ch_dir){
@@ -672,10 +721,10 @@ header {
 			min = 0;
 			
 			while (ts <= (size + solidtiles)){
-				if (ch_dir == "up"){chktile = checkIndex(tl, tl.row+ts, tl.col);}
-				else if (ch_dir == "down"){chktile = checkIndex(tl, tl.row-ts, tl.col);}
-				else if (ch_dir == "left"){chktile = checkIndex(tl, tl.row, tl.col-ts);}
-				else {chktile = checkIndex(tl, tl.row, tl.col+ts);}
+				if (ch_dir == "up"){chktile = checkIndex(tl.row+ts, tl.col);}
+				else if (ch_dir == "down"){chktile = checkIndex(tl.row-ts, tl.col);}
+				else if (ch_dir == "left"){chktile = checkIndex(tl.row, tl.col-ts);}
+				else {chktile = checkIndex(tl.row, tl.col+ts);}
 					
 				pr = chktile.row; 
 				pc = chktile.col;
