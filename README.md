@@ -4,7 +4,7 @@ CodeFoo2017
 <p>
 <b>1) My CodeFoo Video Link:</b>
 <br/>
-<a href="http://google.com">htttp://youtube/shanevideo</a> //Coming Soon!
+<a href="https://www.youtube.com/watch?v=dZcPul43QX8">https://www.youtube.com/watch?v=dZcPul43QX8</a>
 </p>
 -
 
