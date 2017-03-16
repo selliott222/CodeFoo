@@ -6,14 +6,24 @@ CodeFoo2017
 <br/>
 <a href="https://www.youtube.com/watch?v=dZcPul43QX8">https://www.youtube.com/watch?v=dZcPul43QX8</a>
 </p>
--
+<hr/>
 
 <b> 2) King Kong Questions:</b>
 
 <p> 
-According to the <a href="http://www.esbnyc.com/sites/default/files/esb_fact_sheet_4_9_14_4.pdf">Empire State Realty Trust</a>, the Empire State building stands at 1,250 ft. tall with an antenna that reaches an additional 204 ft. The building is about 187 ft. wide and 424 ft. long. With an area of about 79,288 square ft. and volume of 37 million cubic feet. If we assume we are using standard Lincoln logs of about 10 ½ inches in length and ¾ inches in height, then we can construct a hollow cube with 4 sides of 16 logs that reaches 1 ft. in height. However, this cube has only a width and length of only 10½ inches. Therefore 1 cubic foot logs is roughly equal to (.875 * ). Taking this into account, 32 million divided by 7 equals roughly 5,285,714. So the rough estimate of the total number of logs required is equal to 5,285,714 * 448. 2.37 Billion Logs.
+According to the <a href="http://www.esbnyc.com/sites/default/files/esb_fact_sheet_4_9_14_4.pdf">Empire State Realty Trust</a>, the Empire State building stands at 1,250 ft. tall with an antenna that reaches an additional 204 ft. The building is about 187 ft. wide and 424 ft. long with an area of about 79,288 square ft. and volume of 37 million cubic feet. So to create a rough estimate I will attempt to find how many logs in a single cubic ft. block then mulpitple by the total cubic ft. of the building. If we assume we are using standard Lincoln logs of about 10 ½ inches in length and ¾ inches in height, then we can construct a hollow cube with 4 sides of 16 logs that reaches 1 ft. in height. However, this cube has only a width and length of only 10½ inches. Therefore, 1 cubic foot of logs is roughly equal to (4 sides * 16 logs) 64 logs plus an additional
+<br/><br/>
+(10½ / 12 = .875) // length of logs divided by total length of a foot in inches
+<br/>
+(1 - .875 = .125)  // 1 minus the percentage of 12 inches that have already been covered
+<br/>
+(64 * .125 = 8) 	 // 8 equals number of logs missing from the block of 64 logs to cover an entire 1 cubic foot
+<br/>
+<br/>
+8 logs, which is a total of 72 logs per cubic foot. Now that I have estimated the number of logs in a single cubic block I must multiply the number of logs by the total cubic ft. of the building. Taking this into account, 32 million multiplied by 72 is roughly equal to <b>2.304 billion logs</b>.
+
 </p> 
--
+<hr/>
 
 <b>3) Grid Solution (Ruby):</b>
 <br/>
@@ -32,7 +42,7 @@ I've also implemented this ruby script to take two parameters, width and height.
 <br/>
 <br/>
 <img src="img/grid2.JPG" width="340"/>
--
+<hr/>
 
 <b>4) Android App (Java):</b>
 <br/><br/>
@@ -42,7 +52,7 @@ This Android (4.4 KitKat minimum) application gathers and displays data from IGN
 <br/>
 <img src="img/android1.JPG" width="160"/>
 <img src="img/android2.JPG" width="160"/>
--
+<hr/>
 
 <b>5) Front End (JavaScript):</b>
 <br/><br/>
@@ -51,12 +61,12 @@ This web application was built to match IGN's design and be assecable for all de
 </p>
 <br/>
 <img src="img/webapp1.JPG" width="300"/>
--
+<hr/>
 
 <b>Bonus (HTML5):</b>
-- 
 <p>
 Qwirkle! The most challenging assignment of them all! My high score is 131. (instructions included)
 </p>
 <br/>
 <img src="img/qwirkle1.JPG" width="340"/>
+<hr/>
