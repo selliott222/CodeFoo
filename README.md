@@ -57,7 +57,7 @@ This Android (4.4 KitKat minimum) application gathers and displays data from IGN
 <b>5) Front End (JavaScript):</b>
 <br/><br/>
 <p>
-This web application was built to match IGN's design and be assecable for all devices. The application will also dynamically load data and allows to be sorted by catagory similar to the Android applications added functionality. 
+This web application was built to match IGN's design and be accessible for all devices. The application will also dynamically load data and allows to be sorted by category similar to the Android applications added functionality. 
 </p>
 <br/>
 <img src="img/webapp1.JPG" width="300"/>
